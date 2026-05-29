@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICP Pipeline Giáo dục v2.0</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1B6E45;
+            --primary-dark: #134F31;
+            --bg: #FBF9F6;
+            --surface: #FFFFFF;
+            --text: #2D3748;
+            --text-light: #718096;
+            --border: #E2E8F0;
+            
+            /* Tier Colors */
+            --tier-a: #48BB78;
+            --tier-b: #ECC94B;
+            --tier-c: #ED8936;
+            --tier-cold: #A0AEC0;
+            --tier-type: #E53E3E;
+            
+            /* Status Colors */
+            --status-lead-in: #EDF2F7;
+            --status-email: #EBF8FF;
+            --status-called: #FEFCBF;
+            --status-qualified: #E6FFFA;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Be Vietnam Pro', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); line-height: 1.5; padding-bottom: 60px; }
+        
+        /* Layout Header */
+        header { background-color: var(--primary); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .logo-area { display: flex; align-items: center; gap: 10px; }
+        .version-badge { background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+        .nav-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        
+        /* Buttons */
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 500; font-size: 0.9rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-primary { background: white; color: var(--primary); }
+        .btn-primary:hover { background: #EDF2F7; }
+        .btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.4); color: white; }
+        .btn-outline:hover { background: rgba(255,255,255,0.1); }
+        .btn-submit { background: var(--primary); color: white; }
+        .btn-submit:hover { background: var(--primary-dark); }
+        .btn-danger { background: #FFF5F5; color: #C53030; border: 1px solid #FEB2B2; }
+        .btn-danger:hover { background: #FED7D7; }
+
+        /* Main Navigation Tab Mẹ */
+        .main-nav { background: white; border-bottom: 1px solid var(--border); padding: 0 30px; display: flex; gap: 20px; }
+        .nav-tab { padding: 15px 5px; cursor: pointer; font-weight: 500; color: var(--text-light); border-bottom: 3px solid transparent; display: flex; align-items: center; gap: 8px; }
+        .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+        /* App Container */
+        .container { padding: 30px; max-width: 1400px; margin: 0 auto; }
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+
+        /* KPI Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .stat-label { font-size: 0.85rem; color: var(--text-light); font-weight: 500; }
+        .stat-val { font-size: 1.8rem; font-weight: 700; margin-top: 5px; color: var(--text); }
+
+        /* Filter Utilities Bar */
+        .utils-bar { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap; align-items: center; }
+        .search-input { flex: 1; min-width: 250px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; }
+        .filter-select { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; background: white; min-width: 150px; }
+
+        /* Table Data Style */
+        .table-responsive { background: white; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        DataTable { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; }
+        DataTable th { background: #F7FAFC; padding: 12px 16px; font-weight: 600; color: var(--text-light); border-bottom: 1px solid var(--border); }
+        DataTable td { padding: 14px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        DataTable tr:hover { background: #F8FAFC; cursor: pointer; }
+
+        /* Badges Styling */
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
+        .badge-a { background: #C6F6D5; color: #22543D; }
+        .badge-b { background: #FEFCBF; color: #744210; }
+        .badge-c { background: #FEEBC8; color: #7B341E; }
+        .badge-cold { background: #E2E8F0; color: #4A5568; }
+        .badge-type { background: #FED7D7; color: #742A2A; }
+        
+        .badge-status { text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid transparent; }
+        .status-lead-in { background: #EDF2F7; color: #4A5568; }
+        .status-email { background: #EBF8FF; color: #2B6CB0; border-color: #BEE3F8; }
+        .status-called { background: #FEFCBF; color: #744210; border-color: #FAF089; }
+        .status-qualified { background: #E6FFFA; color: #234E52; border-color: #B2F5EA; }
+
+        /* Meter Score Bar */
+        .score-container { display: flex; align-items: center; gap: 8px; }
+        .score-bar-bg { width: 60px; height: 6px; background: #E2E8F0; border-radius: 3px; overflow: hidden; }
+        .score-bar-fill { height: 100%; border-radius: 3px; }
+
+        /* Sliding Detail Panel Right - FIXED TAB SPACING & PADDING */
+        .side-panel { position: fixed; top: 0; right: -650px; width: 650px; height: 100%; background: white; box-shadow: -4px 0 15px rgba(0,0,0,0.15); z-index: 1000; transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
+        .side-panel.open { right: 0; }
+        .panel-header { padding: 20px; border-bottom: 1px solid var(--border); background: #F7FAFC; display: flex; justify-content: space-between; align-items: center; }
+        .panel-close { font-size: 1.5rem; cursor: pointer; color: var(--text-light); border: none; background: transparent; }
+        .panel-body { padding: 20px; overflow-y: auto; flex: 1; }
+        .panel-footer { padding: 15px 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; background: #F7FAFC; }
+
+        /* FIX: Tab-bar inside sliding panel designed cleanly with proper margins */
+        .panel-tabs { display: flex; gap: 12px; margin-bottom: 22px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+        .p-tab { padding: 8px 16px; cursor: pointer; border-radius: 20px; font-size: 0.85rem; font-weight: 500; background: #EDF2F7; color: var(--text-light); transition: all 0.2s; border: 1px solid transparent; }
+        .p-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .panel-tab-content { display: none; }
+        .panel-tab-content.active { display: block; }
+
+        /* Forms Layout */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group.full-width { grid-column: span 2; }
+        label { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+        .form-control { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; background: white; font-size: 0.9rem; }
+        
+        /* Timeline Notebook for Notes */
+        .timeline-notes { margin-top: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .note-log-item { background: #F7FAFC; padding: 10px; border-radius: 6px; border-left: 3px solid var(--primary); font-size: 0.85rem; }
+        .note-meta { font-size: 0.75rem; color: var(--text-light); margin-bottom: 4px; font-weight: bold; }
+
+        /* To-do List Interactive UI */
+        .todo-input-zone { display: flex; gap: 8px; margin-bottom: 15px; }
+        .todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px; background: #F8FAFC; border-radius: 6px; margin-bottom: 8px; border: 1px solid var(--border); }
+        .todo-checkbox { margin-top: 4px; width: 16px; height: 16px; }
+        .todo-text-area { flex: 1; font-size: 0.9rem; }
+        .todo-text-area.done { text-decoration: line-through; color: var(--text-light); }
+        .todo-item-meta { font-size: 0.75rem; color: var(--text-light); margin-top: 2px; font-weight: 500; }
+        .todo-del-btn { color: #E53E3E; background: transparent; border: none; cursor: pointer; font-size: 0.85rem; }
+
+        /* Report Analytics Section UI */
+        .report-filter { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 25px; display: flex; gap: 15px; align-items: center; }
+        .report-cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .report-card { background: white; border: 1px solid var(--border); padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+
+        /* AI Pool Discovery Section Layout */
+        .ai-pool-wrapper { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        .ai-scout-card { background: white; padding: 20px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 20px; }
+        
+        /* Modal Window Pop-up */
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index: 2000; display:none; align-items:center; justify-content:center; }
+        .modal-overlay.open { display: flex; }
+        .modal-content { background: white; padding: 25px; border-radius: 8px; max-width: 550px; width: 90%; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-height: 85vh; overflow-y: auto; }
+
+        /* Alerts Warning red box */
+        .gate-alert { background: #FFF5F5; border: 1px solid #FEB2B2; color: #C53030; padding: 10px 15px; border-radius: 6px; margin-bottom: 15px; font-size: 0.85rem; font-weight: 500; }
+
+        /* Utilities */
+        .hidden { display: none !important; }
+        .mt-3 { margin-top: 15px; }
+        .text-center { text-align: center; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area">
+            <h2>ICP Pipeline Giáo dục</h2>
+            <span class="version-badge" id="appVersionLabel">v2.0</span>
+        </div>
+        <div class="nav-actions">
+            <button class="btn btn-primary" onclick="openLeadPanel(null)">+ Thêm khách hàng</button>
+            <button class="btn btn-outline" onclick="backupData()">📥 Sao lưu (.json)</button>
+            <button class="btn btn-outline" onclick="triggerRestore()">📤 Khôi phục</button>
+            <button class="btn btn-outline" onclick="reloadSharedData()">🔄 Tải lại dữ liệu chung</button>
+            <button class="btn btn-outline" onclick="switchMainTab('settings')">⚙️ Cài đặt</button>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <div class="nav-tab active" data-target="pipeline-view" onclick="switchMainTab('pipeline')">🎯 Pipeline Tiềm năng</div>
+        <div class="nav-tab" data-target="todo-view" onclick="switchMainTab('todo')">📅 Việc cần làm</div>
+        <div class="nav-tab" data-target="report-view" onclick="switchMainTab('report')">📊 Báo cáo Analytics</div>
+        <div class="nav-tab" data-target="discovery-view" onclick="switchMainTab('discovery')">🤖 AI Discovery & Pools</div>
+    </nav>
+
+    <div class="container">
+        
+        <section id="pipeline-view" class="view-section active">
+            <div class="stats-grid" id="kpiStatsGrid">
+                </div>
+
+            <div class="utils-bar">
+                <input type="text" id="searchBar" class="search-input" placeholder="Tìm theo tên trường, trung tâm, người liên hệ..." oninput="renderPipelineTable()">
+                <select id="filterSegment" class="filter-select" onchange="renderPipelineTable()">
+                    <option value="all">Tất cả Mô hình</option>
+                    <option value="school">Trường tư lập</option>
+                    <option value="center">Trung tâm ngoại ngữ</option>
+                </select>
+                <select id="filterProvince" class="filter-select" onchange="renderPipelineTable()">
+                    <option value="all">Tất cả Tỉnh thành</option>
+                </select>
+                <select id="filterTier" class="filter-select" onchange="renderPipelineTable()">
+                    <option value="all">Tất cả Xếp hạng (Tier)</option>
+                    <option value="A">Tier A</option>
+                    <option value="B">Tier B</option>
+                    <option value="C">Tier C</option>
+                    <option value="Cold">Tier Cold</option>
+                    <option value="Loại">❌ Loại</option>
+                </select>
+            </div>
+
+            <div class="table-responsive">
+                <table id="pipelineTable">
+                    <thead>
+                        <tr>
+                            <th>Tên Khách hàng / Người liên hệ</th>
+                            <th>Mô hình</th>
+                            <th>Trạng thái</th>
+                            <th>Tỉnh thành</th>
+                            <th>Điểm số</th>
+                            <th>Xếp hạng</th>
+                            <th>Tác vụ mở</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pipelineTableBody">
+                        </tbody>
+                </table>
+            </div>
+            <div id="emptyState" class="text-center mt-3 hidden">
+                <p style="color: var(--text-light); margin-bottom: 15px;">Chưa có dữ liệu nào trong kho lưu trữ.</p>
+                <button class="btn btn-submit" onclick="loadSampleMockData()">⚡ Nạp dữ liệu mẫu nhanh</button>
+            </div>
+        </section>
+
+        <section id="todo-view" class="view-section">
+            <h3 style="margin-bottom: 20px;">📅 Tổng hợp Tác vụ To-do toàn hệ thống</h3>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                <div>
+                    <h4 style="color: #E53E3E; margin-bottom: 12px; border-bottom: 2px solid #FED7D7; padding-bottom: 6px;">⚠️ Quá hạn</h4>
+                    <div id="todoPoolOverdue"></div>
+                </div>
+                <div>
+                    <h4 style="color: #DD6B20; margin-bottom: 12px; border-bottom: 2px solid #FEEBC8; padding-bottom: 6px;">☀️ Hôm nay</h4>
+                    <div id="todoPoolToday"></div>
+                </div>
+                <div>
+                    <h4 style="color: #3182CE; margin-bottom: 12px; border-bottom: 2px solid #BEE3F8; padding-bottom: 6px;">🚀 Sắp tới / Khác</h4>
+                    <div id="todoPoolUpcoming"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="report-view" class="view-section">
+            <h3 style="margin-bottom: 15px;">📊 Báo cáo Hiệu suất & Phát triển Hệ thống</h3>
+            <div class="report-filter">
+                <label>Lọc Thời gian Tạo khách hàng:</label>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <span>Từ ngày:</span>
+                    <input type="date" id="reportStartDate" class="form-control" onchange="calculateAnalyticsReport()">
+                    <span>Đến ngày:</span>
+                    <input type="date" id="reportEndDate" class="form-control" onchange="calculateAnalyticsReport()">
+                </div>
+            </div>
+
+            <div class="report-cards-grid">
+                <div class="report-card">
+                    <h4>📈 Thống kê Liên hệ Khai thác mới</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 15px;">Số lượng khách hàng tiềm năng được thêm mới vào hệ thống trong khoảng thời gian đã chọn.</p>
+                    <div style="font-size: 2.5rem; font-weight: bold; color: var(--primary);" id="repTotalLeadsCount">0</div>
+                    <div class="mt-3" id="repDistributionStats" style="font-size: 0.9rem; line-height: 1.8;">
+                        </div>
+                </div>
+
+                <div class="report-card">
+                    <h4>✅ Thống kê Hoạt động (To-do) Hoàn thành</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 15px;">Đo lường năng suất tương tác Outbound (Cuộc gọi, Gửi thư điện tử, Hội họp).</p>
+                    <div style="font-size: 2.5rem; font-weight: bold; color: #3182CE;" id="repTotalDoneTodos">0</div>
+                    <div class="mt-3" id="repTodoTypeStats" style="font-size: 0.9rem; line-height: 1.8;">
+                        </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="discovery-view" class="view-section">
+            <div class="ai-scout-card">
+                <h3>🤖 AI Outbound Discovery (Khám phá Thị trường Diện rộng)</h3>
+                <p style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 15px;">Sử dụng Trí tuệ nhân tạo quét tìm các đơn vị giáo dục mới trên không gian mạng theo tiêu chí bộ lọc của bạn.</p>
+                <div style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+                    <div class="form-group">
+                        <label>Từ khóa Quy mô / Khu vực cần quét:</label>
+                        <input type="text" id="aiScoutQuery" class="form-control" style="width: 350px;" placeholder="Ví dụ: Hệ thống trường mầm non quốc tế tại Quận 7 hoặc Trung tâm anh ngữ Bình Dương...">
+                    </div>
+                    <button class="btn btn-submit" style="padding: 10px 20px;" onclick="runAiScoutDiscovery()">🚀 Kích hoạt AI Trinh sát</button>
+                </div>
+                <div id="aiScoutLoading" class="mt-3 hidden" style="color: var(--primary); font-weight: 500;">
+                    ⏳ Hệ thống đang định vị vệ tinh Google Search và phân tích cấu trúc dữ liệu thị trường... Vui lòng đợi trong giây lát.
+                </div>
+            </div>
+
+            <div class="ai-pool-wrapper">
+                <div>
+                    <h4 style="margin-bottom: 12px; color: var(--text);">📋 Kết quả AI đề xuất tiềm năng hiện tại</h4>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Đơn vị phát hiện</th>
+                                    <th>Tỉnh thành</th>
+                                    <th>Mô hình</th>
+                                    <th>Dự kiến Cơ sở</th>
+                                    <th>Điểm ICP sơ bộ</th>
+                                    <th>Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody id="aiScoutResultTableBody">
+                                <tr><td colspan="6" style="text-align: center; color: var(--text-light);">Chưa có dữ liệu trinh sát đợt mới. Hãy nhập từ khóa quét phía trên.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="settings-view" class="view-section">
+            <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <h3 style="margin-bottom: 20px;">⚙️ Cấu hình Hệ thống & Trí tuệ nhân tạo</h3>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label>Google Gemini API Key:</label>
+                    <input type="password" id="cfgApiKey" class="form-control" placeholder="AIzaSy...">
+                </div>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label>Tên Model Xử lý:</label>
+                    <select id="cfgModelName" class="form-control">
+                        <option value="gemini-2.5-flash">gemini-2.5-flash (Mặc định - Khuyên dùng vì Quota cao, Tốc độ nhanh)</option>
+                        <option value="gemini-2.5-pro">gemini-2.5-pro (Phân tích thông tin chuyên sâu nhưng giới hạn gói Free gắt gao)</option>
+                    </select>
+                </div>
+                <button class="btn btn-submit" onclick="saveSystemConfiguration()">Lưu cấu hình hệ thống</button>
+                <div class="gate-alert style-warn mt-3" style="background:#EBF8FF; color:#2B6CB0; border-color:#BEE3F8;">
+                    🔒 <strong>Quy tắc bảo mật tuyệt đối:</strong> Mã khóa API Key của bạn được lưu trữ hoàn toàn độc lập, cục bộ trong trình duyệt cá nhân (localStorage). Không bao giờ gửi về máy chủ hoặc tải lên mã nguồn chung trên GitHub GitHub công khai.
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="side-panel" id="detailSidePanel">
+        <div class="panel-header">
+            <div>
+                <h3 id="panelLeadNameTitle">Chi tiết khách hàng tiềm năng</h3>
+                <div class="score-container mt-3" id="panelLeadScoreBadgeHeader">
+                    </div>
+            </div>
+            <button class="panel-close" onclick="closeLeadPanel()">&times;</button>
+        </div>
+        
+        <div style="padding: 15px 20px 0 20px;">
+            <div class="panel-tabs">
+                <div class="p-tab active" data-tab="p-tab-info" onclick="switchPanelTab('p-tab-info')">📋 Thông tin & Chấm điểm</div>
+                <div class="p-tab" data-tab="p-tab-ai" onclick="switchPanelTab('p-tab-ai')">🤖 AI Research (Deep)</div>
+                <div class="p-tab" data-tab="p-tab-todo" onclick="switchPanelTab('p-tab-todo')">📝 To-do & Hoạt động</div>
+            </div>
+        </div>
+
+        <div class="panel-body">
+            <div id="panelGateAlertBox" class="gate-alert hidden"></div>
+
+            <div id="p-tab-info-content" class="panel-tab-content active">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>Tên cơ sở / Trường học / Trung tâm *</label>
+                        <input type="text" id="f_name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Mô hình Tổ chức</label>
+                        <select id="f_segment" class="form-control" onchange="recalculateCurrentFormScore()">
+                            <option value="school">Trường tư lập</option>
+                            <option value="center">Trung tâm ngoại ngữ</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Trạng thái Tiếp cận Outbound</label>
+                        <select id="f_status" class="form-control">
+                            <option value="Lead in">Lead in (Mới nhập)</option>
+                            <option value="Email touch">Email touch (Đã gửi Email)</option>
+                            <option value="Called">Called (Đã gọi điện)</option>
+                            <option value="Qualified">Qualified (Đã xác thực tiềm năng)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tỉnh thành</label>
+                        <select id="f_province" class="form-control"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Website / Fanpage URL</label>
+                        <input type="url" id="f_website" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Số điện thoại Tổng đài</label>
+                        <input type="text" id="f_phone" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Người liên hệ / Chức vụ</label>
+                        <input type="text" id="f_contact" class="form-control" placeholder="Ví dụ: Anh Nam - Trưởng phòng vận hành">
+                    </div>
+                    <div class="form-group">
+                        <label>Số lượng cơ sở / chi nhánh hiện tại</label>
+                        <input type="number" id="f_campuses" class="form-control" value="0" min="0" oninput="recalculateCurrentFormScore()">
+                    </div>
+                    <div class="form-group">
+                        <label>Tổng số lượng nhân sự nội bộ</label>
+                        <input type="number" id="f_staff" class="form-control" value="0" min="0" oninput="recalculateCurrentFormScore()">
+                    </div>
+                    <div class="form-group">
+                        <label>Hệ thống trường Công lập?</label>
+                        <select id="f_isPublic" class="form-control" onchange="recalculateCurrentFormScore()">
+                            <option value="no">Không (Tư thục/Tư nhân)</option>
+                            <option value="yes">Có (Hệ thống Công lập)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Nhu cầu phần mềm đặc thù</label>
+                        <select id="f_onlyLMS" class="form-control" onchange="recalculateCurrentFormScore()">
+                            <option value="no">Cần quản trị tổng thể / E-Office chuyên sâu</option>
+                            <option value="yes">Chỉ cần quản lý học viên / Hệ thống LMS đơn thuần</option>
+                        </select>
+                    </div>
+                </div>
+
+                <h4 style="margin: 20px 0 10px 0; padding-bottom: 5px; border-bottom: 1px dashed var(--border);">🎯 Chấm điểm 8 tiêu chí ICP chuẩn</h4>
+                <div id="scoringCriteriaFormGroup" style="display: flex; flex-direction: column; gap: 12px;">
+                    </div>
+
+                <h4 style="margin: 25px 0 10px 0;">📝 Nhật ký tiến độ ghi chú (Cập nhật hàng ngày)</h4>
+                <div class="form-group full-width">
+                    <textarea id="f_new_note" class="form-control" rows="2" placeholder="Nhập thêm diễn biến cuộc gọi, thông tin mới thăm dò hôm nay..."></textarea>
+                    <button class="btn btn-submit" style="align-self: flex-end; padding: 4px 12px; font-size: 0.8rem;" onclick="appendLogNoteTimeline()">Add note log</button>
+                </div>
+                <div class="timeline-notes" id="panelTimelineNotesHistory">
+                    </div>
+            </div>
+
+            <div id="p-tab-ai-content" class="panel-tab-content">
+                <p style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 15px;">Kích hoạt AI quét sâu cơ sở dữ liệu số để thu thập phân tích chi tiết của đơn vị giáo dục hiện tại.</p>
+                <button class="btn btn-submit" id="btnDeepAiResearchRun" onclick="runDeepAiResearchSingleLead()">🔍 Nghiên cứu chuyên sâu bằng Gemini API</button>
+                <div id="panelAiDeepLoadingStatus" class="mt-3 hidden" style="color: var(--primary); font-weight: bold;">
+                    ⏳ Vệ tinh AI đang phân tích dữ liệu website và báo cáo chuyển đổi... Vui lòng không đóng panel.
+                </div>
+                <div class="mt-3" id="panelAiResearchResultContainer" style="line-height: 1.6; font-size: 0.95rem;">
+                    </div>
+            </div>
+
+            <div id="p-tab-todo-content" class="panel-tab-content">
+                <h4 style="margin-bottom: 12px;">✏️ Thiết lập hành động tiếp theo</h4>
+                <div class="todo-input-zone">
+                    <select id="todoNewType" class="form-control" style="width: 100px;">
+                        <option value="Call">📞 Call</option>
+                        <option value="Email">✉️ Email</option>
+                        <option value="Meeting">🤝 Meet</option>
+                    </select>
+                    <input type="text" id="todoNewText" class="form-control" style="flex: 1;" placeholder="Nội dung chi tiết công việc cần làm...">
+                    <input type="date" id="todoNewDate" class="form-control" style="width: 140px;">
+                    <button class="btn btn-submit" onclick="addTodoItemToCurrentLead()">Thêm việc</button>
+                </div>
+
+                <h5 style="color: var(--text-light); margin: 15px 0 8px 0;">🎯 Công việc đang mở</h5>
+                <div id="panelLeadTodosOpenList"></div>
+                <h5 style="color: var(--text-light); margin: 20px 0 8px 0;">✅ Công việc đã hoàn tất</h5>
+                <div id="panelLeadTodosDoneList"></div>
+            </div>
+        </div>
+
+        <div class="panel-footer">
+            <button class="btn btn-danger" id="panelFooterDeleteBtn" onclick="deleteCurrentLeadItem()">Xóa khách hàng</button>
+            <button class="btn btn-submit" style="padding: 10px 25px;" onclick="saveCurrentLeadFormDetails()">💾 Lưu lại thay đổi</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="aiScoutPreviewModal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 12px;" id="modalPreviewTitle">Chi tiết AI Trinh sát</h3>
+            <div style="background: #F7FAFC; padding: 15px; border-radius: 6px; font-size: 0.95rem; line-height: 1.6; margin-bottom: 20px; border-left: 4px solid var(--primary);" id="modalPreviewTextBody">
+                </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button class="btn btn-danger" style="background:#EDF2F7; color:var(--text); border:none;" onclick="closeAiScoutPreviewModal()">Đóng lại</button>
+                <button class="btn btn-submit" id="modalPreviewActionBtn">Thêm vào Pipeline chính</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Hằng số lõi cấu hình hệ thống
+        const APP_VERSION = "v2.0";
+        const DATA_VERSION = 2;
+        const DEFAULT_STORAGE_KEY = "icp_leads";
+        const AI_POOL_STORAGE_KEY = "icp_ai_pool";
+
+        // Danh sách 63 tỉnh thành Việt Nam đầy đủ
+        const VIETNAM_PROVINCES = [
+            "TPHCM", "An Giang", "Bà Rịa - Vũng Tàu", "Bắc Giang", "Bắc Kạn", "Bạc Liêu", "Bắc Ninh", "Bến Tre", "Bình Định", 
+            "Bình Dương", "Bình Phước", "Bình Thuận", "Cà Mau", "Cần Thơ", "Cao Bằng", "Đà Nẵng", "Đắk Lắk", "Đắk Nông", 
+            "Điện Biên", "Đồng Nai", "Đồng Tháp", "Gia Lai", "Hà Giang", "Hà Nam", "Hà Nội", "Hà Tĩnh", "Hải Dương", 
+            "Hải Phòng", "Hậu Giang", "Hòa Bình", "Hưng Yên", "Khánh Hòa", "Kiên Giang", "Kon Tum", "Lai Châu", "Lâm Đồng", 
+            "Lạng Sơn", "Lào Cai", "Long An", "Nam Định", "Nghệ An", "Ninh Bình", "Ninh Thuận", "Phú Thọ", "Phú Yên", 
+            "Quảng Bình", "Quảng Nam", "Quảng Ngãi", "Quảng Ninh", "Quảng Trị", "Sóc Trăng", "Sơn La", "Tây Ninh", 
+            "Thái Bình", "Thái Nguyên", "Thanh Hóa", "Thừa Thiên Huế", "Tiền Giang", "Trà Vinh", "Tuyên Quang", "Vĩnh Long", 
+            "Vĩnh Phúc", "Yên Bái"
+        ];
+
+        // 8 Tiêu chí chấm điểm ICP cốt lõi
+        const CRITERIA_METRICS = {
+            s1: { name: "Nhân sự cơ hữu (GV + hành chính)", weight: 20, options: ["Dưới 15", "15–29", "30–59", "Từ 60"] },
+            s2: { name: "Số cơ sở / chi nhánh", weight: 18, options: ["1 cơ sở", "2 cơ sở", "3–4 cơ sở", "Từ 5 cơ sở"] },
+            s3: { name: "Phức tạp chấm công & lương", weight: 15, options: ["Lương cố định, 1 cơ sở", "Có ca/tiết, 1 cơ sở", "Theo tiết/ca + 2–3 cơ sở", "Theo tiết/ca, nhiều cơ sở, nhiều loại HĐ"] },
+            s4: { name: "Tín hiệu tuyển dụng", weight: 12, options: ["Gần như không tuyển", "Lác đác", "Đều theo mùa khai giảng", "Ồ ạt / liên tục"] },
+            s5: { name: "Mức độ đau / hiện trạng số hóa", weight: 12, options: ["Đã có phần mềm tốt", "Đang dùng đối thủ", "Excel + Zalo, quá tải", "Thủ công / giấy hoàn toàn"] },
+            s6: { name: "Trigger thời điểm", weight: 8, options: ["Không tín hiệu", "1 tín hiệu yếu", "Đang mở cơ sở / tái cấu trúc", "Vừa gọi vốn / M&A / thay lãnh đạo"] },
+            s7: { name: "Khả năng chi trả", weight: 10, options: ["Phân khúc rất thấp", "Phổ thông", "Song ngữ / học phí khá", "Quốc tế / cao cấp / có quỹ"] },
+            s8: { name: "Tiếp cận người quyết định", weight: 5, options: ["Chưa rõ ai quyết", "Biết tổ chức, chưa có LH", "Có LH cấp trung (HR/VH)", "Tiếp cận trực tiếp lãnh đạo"] }
+        };
+
+        // Biến toàn cục chứa bộ nhớ chạy của ứng dụng
+        let appState = { v: DATA_VERSION, savedAt: Date.now(), leads: [] };
+        let aiScoutPool = []; // Chứa danh sách loại trừ các đơn vị đã trinh sát trước đó
+        let activeLeadId = null; 
+        let tempScoutedList = []; // Lưu trữ danh sách tạm thời của AI Discovery kết quả
+
+        // Cấu trúc mô hình một khách hàng mặc định (Tránh lỗi Undefined trường mới khi nâng cấp hệ thống)
+        function createDefaultLeadSchema() {
+            return {
+                id: "", name: "", segment: "school", status: "Lead in", province: "TPHCM",
+                website: "", phone: "", contact: "", notes: "", noteLogs: [],
+                campuses: 0, staff: 0, isPublic: "no", onlyLMS: "no",
+                s1: 0, s2: 0, s3: 0, s4: 0, s5: 0, s6: 0, s7: 0, s8: 0,
+                todos: [], aiSummary: "", created: new Date().toISOString().split('T')[0], updated: new Date().toISOString().split('T')[0]
+            };
+        }
+
+        // Khởi động hệ thống khi tải trang hoàn tất
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('appVersionLabel').innerText = APP_VERSION;
+            populateProvincesDropdowns();
+            buildScoringDropdownsForm();
+            loadAllDataFromLocalStorage();
+            switchMainTab('pipeline');
+        });
+
+        // Nạp danh sách tỉnh thành vào các bộ lọc dropdown
+        function populateProvincesDropdowns() {
+            const filterProv = document.getElementById('filterProvince');
+            const formProv = document.getElementById('f_province');
+            
+            VIETNAM_PROVINCES.forEach(p => {
+                let opt1 = document.createElement('option'); opt1.value = p; opt1.innerText = p; filterProv.appendChild(opt1);
+                let opt2 = document.createElement('option'); opt2.value = p; opt2.innerText = p; formProv.appendChild(opt2);
+            });
+        }
+
+        // Tự động xây dựng cấu trúc HTML cho 8 tiêu chí chấm điểm
+        function buildScoringDropdownsForm() {
+            const container = document.getElementById('scoringCriteriaFormGroup');
+            container.innerHTML = '';
+            for (let key in CRITERIA_METRICS) {
+                let m = CRITERIA_METRICS[key];
+                let div = document.createElement('div'); div.className = 'form-group';
+                let label = document.createElement('label'); label.innerText = `${key.toUpperCase()}. ${m.name} (Trọng số: ${m.weight}%)`;
+                let select = document.createElement('select'); select.id = `f_${key}`; select.className = 'form-control';
+                select.setAttribute('onchange', 'recalculateCurrentFormScore()');
+                
+                m.options.forEach((opt, idx) => {
+                    let o = document.createElement('option'); o.value = idx; o.innerText = `${idx} – ${opt}`; select.appendChild(o);
+                });
+                div.appendChild(label); div.appendChild(select); container.appendChild(div);
+            }
+        }
+
+        // Tải toàn bộ dữ liệu từ bộ nhớ cục bộ
+        function loadAllDataFromLocalStorage() {
+            let rawData = localStorage.getItem(DEFAULT_STORAGE_KEY);
+            let rawPool = localStorage.getItem(AI_POOL_STORAGE_KEY);
+            
+            if (rawPool) { try { aiScoutPool = JSON.parse(rawPool); } catch(e) { aiScoutPool = []; } }
+
+            if (!rawData) {
+                // Nếu bộ nhớ trống, nạp thử file data.json dùng chung phân cấp
+                fetch('./data.json')
+                    .then(res => res.ok ? res.json() : null)
+                    .then(json => {
+                        if (json) { processImportedJsonPackage(json); } else { toggleEmptyStateLayout(true); }
+                    }).catch(() => toggleEmptyStateLayout(true));
+            } else {
+                try {
+                    let parsed = JSON.parse(rawData);
+                    if (Array.isArray(parsed)) {
+                        appState.leads = parsed.map(l => Object.assign(createDefaultLeadSchema(), l));
+                    } else if (parsed.leads) {
+                        appState.leads = parsed.leads.map(l => Object.assign(createDefaultLeadSchema(), l));
+                        appState.v = parsed.v || DATA_VERSION;
+                    }
+                    saveDataToLocalStorage();
+                    renderPipelineTable();
+                } catch(e) {
+                    toggleEmptyStateLayout(true);
+                }
+            }
+        }
+
+        function saveDataToLocalStorage() {
+            appState.savedAt = Date.now();
+            localStorage.setItem(DEFAULT_STORAGE_KEY, JSON.stringify(appState));
+            localStorage.setItem(AI_POOL_STORAGE_KEY, JSON.stringify(aiScoutPool));
+        }
+
+        function toggleEmptyStateLayout(show) {
+            document.getElementById('emptyState').className = show ? 'text-center mt-3' : 'text-center mt-3 hidden';
+            document.getElementById('pipelineTable').className = show ? 'hidden' : '';
+        }
+
+        // Navigation tab mẹ điều hướng chính
+        function switchMainTab(target) {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            
+            if (target === 'pipeline') {
+                document.querySelector('[data-target="pipeline-view"]').classList.add('active');
+                document.getElementById('pipeline-view').classList.add('active');
+                renderPipelineTable();
+            } else if (target === 'todo') {
+                document.querySelector('[data-target="todo-view"]').classList.add('active');
+                document.getElementById('todo-view').classList.add('active');
+                renderGlobalTodoPoolDashboard();
+            } else if (target === 'report') {
+                document.querySelector('[data-target="report-view"]').classList.add('active');
+                document.getElementById('report-view').classList.add('active');
+                setDefaultReportDates();
+                calculateAnalyticsReport();
+            } else if (target === 'discovery') {
+                document.querySelector('[data-target="discovery-view"]').classList.add('active');
+                document.getElementById('discovery-view').classList.add('active');
+                renderAiScoutTableOutput();
+            } else if (target === 'settings') {
+                document.getElementById('settings-view').classList.add('active');
+                document.getElementById('cfgApiKey').value = localStorage.getItem('gemini_api_key') || '';
+                document.getElementById('cfgModelName').value = localStorage.getItem('gemini_model_name') || 'gemini-2.5-flash';
+            }
+        }
+
+        // Thuật toán cốt lõi tính toán điểm và cổng loại (Gate)
+        function computeIcpScoreAndTier(l) {
+            let totalWeightedScore = 0;
+            for (let key in CRITERIA_METRICS) {
+                let scoreValue = parseInt(l[key] || 0);
+                totalWeightedScore += scoreValue * CRITERIA_METRICS[key].weight;
+            }
+            let finalScore = Math.round(totalWeightedScore / 3);
+
+            // Kiểm tra các quy tắc cổng loại (Gate)
+            let gateReasons = [];
+            if (l.isPublic === "yes") gateReasons.push("Trường/ĐH thuộc khối công lập");
+            if (l.onlyLMS === "yes") gateReasons.push("Chỉ có nhu cầu LMS/quản lý học viên lẻ");
+            if (l.segment === "center" && parseInt(l.campuses) > 0 && parseInt(l.campuses) < 3) gateReasons.push("Trung tâm ngoại ngữ quy mô nhỏ dưới 3 chi nhánh");
+            if (parseInt(l.staff) > 0 && parseInt(l.staff) < 15) gateReasons.push("Tổng nhân sự nội bộ dưới 15 người");
+
+            if (gateReasons.length > 0) {
+                return { score: finalScore, tier: "Loại", reasons: gateReasons };
+            }
+
+            // Phân bổ Tier hạng hạng mục
+            let tier = "Cold";
+            if (finalScore >= 70) tier = "A";
+            else if (finalScore >= 50) tier = "B";
+            else if (finalScore >= 35) tier = "C";
+
+            return { score: finalScore, tier: tier, reasons: [] };
+        }
+
+        // Kết xuất bảng Pipeline dữ liệu chính
+        function renderPipelineTable() {
+            const tbody = document.getElementById('pipelineTableBody');
+            tbody.innerHTML = '';
+            
+            const search = document.getElementById('searchBar').value.toLowerCase();
+            const segment = document.getElementById('filterSegment').value;
+            const province = document.getElementById('filterProvince').value;
+            const tier = document.getElementById('filterTier').value;
+
+            // Lọc danh sách theo điều kiện tìm kiếm
+            let filtered = appState.leads.filter(l => {
+                let calc = computeIcpScoreAndTier(l);
+                let matchSearch = l.name.toLowerCase().includes(search) || l.contact.toLowerCase().includes(search);
+                let matchSeg = (segment === 'all' || l.segment === segment);
+                let matchProv = (province === 'all' || l.province === province);
+                let matchTier = (tier === 'all' || calc.tier === tier);
+                return matchSearch && matchSeg && matchProv && matchTier;
+            });
+
+            // Sắp xếp thứ tự ưu tiên điểm số giảm dần
+            filtered.sort((x, y) => {
+                let cx = computeIcpScoreAndTier(x); let cy = computeIcpScoreAndTier(y);
+                if (cx.tier === "Loại" && cy.tier !== "Loại") return 1;
+                if (cx.tier !== "Loại" && cy.tier === "Loại") return -1;
+                return cy.score - cx.score;
+            });
+
+            toggleEmptyStateLayout(appState.leads.length === 0);
+            if (filtered.length === 0 && appState.leads.length > 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-light);">Không tìm thấy khách hàng nào khớp với điều kiện lọc.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(l => {
+                let calc = computeIcpScoreAndTier(l);
+                let openTodos = l.todos.filter(t => !t.done).length;
+                let tr = document.createElement('tr');
+                tr.setAttribute('onclick', `openLeadPanel("${l.id}")`);
+                
+                let barColor = "var(--tier-cold)";
+                if (calc.tier === 'A') barColor = "var(--tier-a)";
+                else if (calc.tier === 'B') barColor = "var(--tier-b)";
+                else if (calc.tier === 'C') barColor = "var(--tier-c)";
+                else if (calc.tier === 'Loại') barColor = "var(--tier-type)";
+
+                tr.innerHTML = `
+                    <td><strong>${l.name}</strong><br><span style="font-size:0.8rem; color:var(--text-light);">${l.contact || 'Chưa rõ liên hệ'}</span></td>
+                    <td>${l.segment === 'school' ? '🏫 Trường tư' : '🔤 Trung tâm'}</td>
+                    <td><span class="badge badge-status status-${l.status.toLowerCase().replace(' ', '-')}">${l.status}</span></td>
+                    <td>📍 ${l.province}</td>
+                    <td>
+                        <div class="score-container">
+                            <span style="font-weight:bold; width:22px;">${calc.score}</span>
+                            <div class="score-bar-bg"><div class="score-bar-fill" style="width:${calc.score}%; background:${barColor};"></div></div>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-${calc.tier === 'Loại' ? 'type' : calc.tier.toLowerCase()}">${calc.tier === 'Loại' ? '❌ Loại' : 'Tier ' + calc.tier}</span></td>
+                    <td style="text-align:center;"><span style="font-weight:bold; color:${openTodos > 0 ? 'var(--primary)': 'var(--text-light)'};">${openTodos}</span></td>
+                    <td><button class="btn btn-danger" style="padding:4px 8px; font-size:0.8rem;" onclick="event.stopPropagation(); executeFastDelete('${l.id}')">Xóa</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            renderKpiTopStatsGridBar();
+        }
+
+        // Cập nhật dải thẻ thông số KPI đầu trang pipeline
+        function renderKpiTopStatsGridBar() {
+            const grid = document.getElementById('kpiStatsGrid');
+            let total = appState.leads.length;
+            let ta = 0, tb = 0, tc = 0, tcold = 0, ttype = 0;
+            
+            appState.leads.forEach(l => {
+                let c = computeIcpScoreAndTier(l);
+                if (c.tier === 'A') ta++;
+                else if (c.tier === 'B') tb++;
+                else if (c.tier === 'C') tc++;
+                else if (c.tier === 'Cold') tcold++;
+                else if (c.tier === 'Loại') ttype++;
+            });
+
+            grid.innerHTML = `
+                <div class="stat-card" style="border-left: 4px solid var(--primary);"><div class="stat-label">Tổng Lead Pipeline</div><div class="stat-val">${total}</div></div>
+                <div class="stat-card" style="border-left: 4px solid var(--tier-a);"><div class="stat-label">🎯 Tier A (Chạm ngay)</div><div class="stat-val" style="color:var(--tier-a);">${ta}</div></div>
+                <div class="stat-card" style="border-left: 4px solid var(--tier-b);"><div class="stat-label">⚡ Tier B</div><div class="stat-val" style="color:var(--tier-b);">${tb}</div></div>
+                <div class="stat-card" style="border-left: 4px solid var(--tier-c);"><div class="stat-label">☕ Tier C</div><div class="stat-val" style="color:var(--tier-c);">${tc}</div></div>
+                <div class="stat-card" style="border-left: 4px solid var(--tier-cold);"><div class="stat-label">❄️ Tier Cold</div><div class="stat-val" style="color:var(--tier-cold);">${tcold}</div></div>
+                <div class="stat-card" style="border-left: 4px solid var(--tier-type);"><div class="stat-label">❌ Bị Loại (Gate)</div><div class="stat-val" style="color:var(--tier-type);">${ttype}</div></div>
+            `;
+        }
+
+        // Điều khiển Sliding Panel Chi tiết
+        function openLeadPanel(id) {
+            activeLeadId = id;
+            switchPanelTab('p-tab-info');
+            
+            if (!id) {
+                // Thiết lập form trống cho hành động thêm mới
+                document.getElementById('panelLeadNameTitle').innerText = "Thêm cơ sở tiềm năng mới";
+                let defaultLead = createDefaultLeadSchema();
+                populateLeadFormFields(defaultLead);
+                document.getElementById('panelFooterDeleteBtn').classList.add('hidden');
+            } else {
+                let lead = appState.leads.find(l => l.id === id);
+                document.getElementById('panelLeadNameTitle').innerText = lead.name;
+                populateLeadFormFields(lead);
+                document.getElementById('panelFooterDeleteBtn').classList.remove('hidden');
+                renderTimelineLogsHistoryMarkup(lead);
+                renderLeadTodosPanelList(lead);
+            }
+            
+            document.getElementById('detailSidePanel').classList.add('open');
+            recalculateCurrentFormScore();
+        }
+
+        function closeLeadPanel() {
+            document.getElementById('detailSidePanel').classList.remove('open');
+            activeLeadId = null;
+        }
+
+        function switchPanelTab(tabId) {
+            document.querySelectorAll('.p-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.panel-tab-content').forEach(c => c.classList.remove('active'));
+            
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+            document.getElementById(`${tabId}-content`).classList.add('active');
+        }
+
+        // Đổ dữ liệu object vào form giao diện
+        function populateLeadFormFields(l) {
+            document.getElementById('f_name').value = l.name;
+            document.getElementById('f_segment').value = l.segment;
+            document.getElementById('f_status').value = l.status;
+            document.getElementById('f_province').value = l.province;
+            document.getElementById('f_website').value = l.website;
+            document.getElementById('f_phone').value = l.phone;
+            document.getElementById('f_contact').value = l.contact;
+            document.getElementById('f_campuses').value = l.campuses;
+            document.getElementById('f_staff').value = l.staff;
+            document.getElementById('f_isPublic').value = l.isPublic;
+            document.getElementById('f_onlyLMS').value = l.onlyLMS;
+            document.getElementById('f_new_note').value = '';
+            document.getElementById('panelAiResearchResultContainer').innerHTML = l.aiSummary || '<p style="color:var(--text-light);">Chưa có báo cáo dữ liệu AI. Bấm nút phía trên để tự động phân tích trích xuất.</p>';
+
+            for (let key in CRITERIA_METRICS) {
+                document.getElementById(`f_${key}`).value = l[key] || 0;
+            }
+        }
+
+        // Trích xuất thông tin từ form ra object
+        function extractLeadObjectFromFields() {
+            let obj = {
+                name: document.getElementById('f_name').value.trim(),
+                segment: document.getElementById('f_segment').value,
+                status: document.getElementById('f_status').value,
+                province: document.getElementById('f_province').value,
+                website: document.getElementById('f_website').value.trim(),
+                phone: document.getElementById('f_phone').value.trim(),
+                contact: document.getElementById('f_contact').value.trim(),
+                campuses: parseInt(document.getElementById('f_campuses').value) || 0,
+                staff: parseInt(document.getElementById('f_staff').value) || 0,
+                isPublic: document.getElementById('f_isPublic').value,
+                onlyLMS: document.getElementById('f_onlyLMS').value,
+                updated: new Date().toISOString().split('T')[0]
+            };
+
+            for (let key in CRITERIA_METRICS) {
+                obj[key] = parseInt(document.getElementById(`f_${key}`).value) || 0;
+            }
+            return obj;
+        }
+
+        // Ép tính toán trực tiếp điểm số khi thao tác đổi dropdown trên form
+        function recalculateCurrentFormScore() {
+            let extracted = extractLeadObjectFromFields();
+            let calc = computeIcpScoreAndTier(extracted);
+            
+            let headerBadge = document.getElementById('panelLeadScoreBadgeHeader');
+            let alertBox = document.getElementById('panelGateAlertBox');
+
+            let badgeColorClass = "badge-cold";
+            if (calc.tier === 'A') badgeColorClass = "badge-a";
+            else if (calc.tier === 'B') badgeColorClass = "badge-b";
+            else if (calc.tier === 'C') badgeColorClass = "badge-c";
+            else if (calc.tier === 'Loại') badgeColorClass = "badge-type";
+
+            headerBadge.innerHTML = `
+                <span style="font-size:1.5rem; font-weight:700;">${calc.score} điểm</span>
+                <span class="badge ${badgeColorClass}" style="font-size:1rem; padding: 4px 12px;">Tier ${calc.tier}</span>
+            `;
+
+            if (calc.tier === "Loại") {
+                alertBox.innerText = `🚨 CẢNH BÁO CỔNG LOẠI (GATE): Đơn vị này dính tiêu chí loại do: ${calc.reasons.join(', ')}`;
+                alertBox.classList.remove('hidden');
+            } else {
+                alertBox.classList.add('hidden');
+            }
+        }
+
+        // Thêm ghi chú dòng thời gian lịch sử (Timeline Notes)
+        function appendLogNoteTimeline() {
+            let noteText = document.getElementById('f_new_note').value.trim();
+            if (!noteText) return alert("Vui lòng nhập nội dung ghi chú trước!");
+
+            let logItem = {
+                timestamp: new Date().toLocaleString('vi-VN'),
+                text: noteText
+            };
+
+            if (activeLeadId) {
+                let lead = appState.leads.find(l => l.id === activeLeadId);
+                lead.noteLogs.unshift(logItem);
+                renderTimelineLogsHistoryMarkup(lead);
+                document.getElementById('f_new_note').value = '';
+                saveDataToLocalStorage();
+            } else {
+                // Tạo một mảng ghi chú tạm nếu là đối tượng thêm mới chưa có ID
+                if (!window.tempNoteLogs) window.tempNoteLogs = [];
+                window.tempNoteLogs.unshift(logItem);
+                renderTimelineLogsHistoryMarkup({ noteLogs: window.tempNoteLogs });
+                document.getElementById('f_new_note').value = '';
+            }
+        }
+
+        function renderTimelineLogsHistoryMarkup(lead) {
+            const container = document.getElementById('panelTimelineNotesHistory');
+            container.innerHTML = '';
+            if (!lead.noteLogs || lead.noteLogs.length === 0) {
+                container.innerHTML = '<p style="font-size:0.85rem; color:var(--text-light); text-align:center;">Chưa có nhật ký ghi chú nào được lưu lại.</p>';
+                return;
+            }
+            lead.noteLogs.forEach(n => {
+                let div = document.createElement('div'); div.className = 'note-log-item';
+                div.innerHTML = `<div class="note-meta">⏱️ ${n.timestamp}</div><div>${n.text}</div>`;
+                container.appendChild(div);
+            });
+        }
+
+        // Quản lý hoạt động công việc nội bộ (To-dos) cho từng khách hàng
+        function renderLeadTodosPanelList(lead) {
+            const openList = document.getElementById('panelLeadTodosOpenList');
+            const doneList = document.getElementById('panelLeadTodosDoneList');
+            openList.innerHTML = ''; doneList.innerHTML = '';
+
+            let activeTodos = lead.todos.filter(t => !t.done);
+            let finishedTodos = lead.todos.filter(t => t.done);
+
+            if (activeTodos.length === 0) openList.innerHTML = '<p style="font-size:0.85rem; color:var(--text-light);">Không có tác vụ nào đang mở.</p>';
+            if (finishedTodos.length === 0) doneList.innerHTML = '<p style="font-size:0.85rem; color:var(--text-light);">Chưa có tác vụ hoàn tất nào.</p>';
+
+            lead.todos.forEach(t => {
+                let icon = t.type === 'Call' ? '📞' : (t.type === 'Email' ? '✉️' : '🤝');
+                let div = document.createElement('div'); div.className = 'todo-item';
+                div.innerHTML = `
+                    <input type="checkbox" class="todo-checkbox" ${t.done ? 'checked' : ''} onchange="toggleTodoStatus('${lead.id}', '${t.id}')">
+                    <div class="todo-text-area ${t.done ? 'done' : ''}">
+                        <strong>${icon} [${t.type}]</strong> ${t.content}
+                        <div class="todo-item-meta">📅 Hạn định: ${t.due || 'Không cấu hình'}</div>
+                    </div>
+                    <button class="todo-del-btn" onclick="deleteTodoItem('${lead.id}', '${t.id}')">&times; Xóa</button>
+                `;
+                if (t.done) doneList.appendChild(div); else openList.appendChild(div);
+            });
+        }
+
+        function addTodoItemToCurrentLead() {
+            if (!activeLeadId) return alert("Vui lòng lưu thông tin cơ bản khách hàng này trước khi thiết lập công việc bổ sung!");
+            let text = document.getElementById('todoNewText').value.trim();
+            let date = document.getElementById('todoNewDate').value;
+            let type = document.getElementById('todoNewType').value;
+
+            if (!text) return alert("Nội dung hành động hoạt động không được để trống!");
+            
+            let lead = appState.leads.find(l => l.id === activeLeadId);
+            lead.todos.push({
+                id: 'todo_' + Date.now(),
+                type: type,
+                content: text,
+                due: date || null,
+                done: false
+            });
+
+            document.getElementById('todoNewText').value = '';
+            document.getElementById('todoNewDate').value = '';
+            renderLeadTodosPanelList(lead);
+            saveDataToLocalStorage();
+        }
+
+        function toggleTodoStatus(leadId, todoId) {
+            let lead = appState.leads.find(l => l.id === leadId);
+            let todo = lead.todos.find(t => t.id === todoId);
+            todo.done = !todo.done;
+            renderLeadTodosPanelList(lead);
+            saveDataToLocalStorage();
+        }
+
+        function deleteTodoItem(leadId, todoId) {
+            if (!confirm("Bạn có chắc chắn muốn hủy bỏ xóa tác vụ này?")) return;
+            let lead = appState.leads.find(l => l.id === leadId);
+            lead.todos = lead.todos.filter(t => t.id !== todoId);
+            renderLeadTodosPanelList(lead);
+            saveDataToLocalStorage();
+        }
+
+        // Thực thi lưu Form khách hàng
+        function saveCurrentLeadFormDetails() {
+            let nameField = document.getElementById('f_name').value.trim();
+            if (!nameField) return alert("Tên đơn vị khách hàng là bắt buộc không được bỏ trống!");
+
+            let extractedData = extractLeadObjectFromFields();
+
+            if (!activeLeadId) {
+                // Hành động tạo mới hoàn toàn
+                extractedData.id = 'lead_' + Date.now();
+                extractedData.created = new Date().toISOString().split('T')[0];
+                extractedData.noteLogs = window.tempNoteLogs || [];
+                appState.leads.push(extractedData);
+                window.tempNoteLogs = [];
+            } else {
+                // Hành động cập nhật đè dữ liệu cũ
+                let index = appState.leads.findIndex(l => l.id === activeLeadId);
+                extractedData.id = activeLeadId;
+                extractedData.created = appState.leads[index].created;
+                extractedData.todos = appState.leads[index].todos;
+                extractedData.noteLogs = appState.leads[index].noteLogs;
+                extractedData.aiSummary = appState.leads[index].aiSummary;
+                appState.leads[index] = extractedData;
+            }
+
+            saveDataToLocalStorage();
+            closeLeadPanel();
+            renderPipelineTable();
+        }
+
+        function executeFastDelete(id) {
+            if (confirm("Xác nhận xóa hoàn toàn khách hàng này khỏi hệ thống cơ sở?")) {
+                appState.leads = appState.leads.filter(l => l.id !== id);
+                saveDataToLocalStorage();
+                renderPipelineTable();
+            }
+        }
+
+        function deleteCurrentLeadItem() {
+            if (activeLeadId) {
+                executeFastDelete(activeLeadId);
+                closeLeadPanel();
+            }
+        }
+
+        // ================= JAVASCRIPT LOGIC SECTION 2: VIỆC CẦN LÀM POOL HUB =================
+        function renderGlobalTodoPoolDashboard() {
+            const overdueContainer = document.getElementById('todoPoolOverdue');
+            const todayContainer = document.getElementById('todoPoolToday');
+            const upcomingContainer = document.getElementById('todoPoolUpcoming');
+
+            overdueContainer.innerHTML = ''; todayContainer.innerHTML = ''; upcomingContainer.innerHTML = '';
+
+            let todayStr = new Date().toISOString().split('T')[0];
+
+            let hasOverdue = false, hasToday = false, hasUpcoming = false;
+
+            appState.leads.forEach(l => {
+                l.todos.forEach(t => {
+                    if (t.done) return; // Bỏ qua tác vụ đã làm xong
+
+                    let div = document.createElement('div');
+                    div.className = 'todo-item';
+                    div.style.borderLeft = "3px solid var(--primary)";
+                    let icon = t.type === 'Call' ? '📞' : (t.type === 'Email' ? '✉️' : '🤝');
+                    div.innerHTML = `
+                        <div class="todo-text-area">
+                            <strong>${icon} ${l.name}</strong><br>
+                            <span style="font-size:0.85rem;">${t.content}</span>
+                            <div class="todo-item-meta">🎯 Hạn chót: ${t.due || 'Không ghi'}</div>
+                        </div>
+                        <button class="btn btn-submit" style="padding:4px 8px; font-size:0.75rem;" onclick="fastCompleteTodoGlobal('${l.id}', '${t.id}')">Xong</button>
+                    `;
+
+                    if (!t.due) {
+                        upcomingContainer.appendChild(div); hasUpcoming = true;
+                    } else if (t.due < todayStr) {
+                        overdueContainer.appendChild(div); hasOverdue = true;
+                    } else if (t.due === todayStr) {
+                        todayContainer.appendChild(div); hasToday = true;
+                    } else {
+                        upcomingContainer.appendChild(div); hasUpcoming = true;
+                    }
+                });
+            });
+
+            if (!hasOverdue) overdueContainer.innerHTML = '<p style="color:var(--text-light); font-size:0.85rem;">🌈 Tuyệt vời! Không có việc nào bị tồn đọng quá hạn.</p>';
+            if (!hasToday) todayContainer.innerHTML = '<p style="color:var(--text-light); font-size:0.85rem;">Thảnh thơi! Hôm nay không có lịch hẹn Outbound cố định.</p>';
+            if (!hasUpcoming) upcomingContainer.innerHTML = '<p style="color:var(--text-light); font-size:0.85rem;">Trống lịch trình tiếp theo.</p>';
+        }
+
+        function fastCompleteTodoGlobal(leadId, todoId) {
+            let lead = appState.leads.find(l => l.id === leadId);
+            let todo = lead.todos.find(t => t.id === todoId);
+            todo.done = true;
+            saveDataToLocalStorage();
+            renderGlobalTodoPoolDashboard();
+        }
+
+        // ================= JAVASCRIPT LOGIC SECTION 3: ANALYTICS BÁO CÁO ENGINE =================
+        function setDefaultReportDates() {
+            if (!document.getElementById('reportStartDate').value) {
+                let d = new Date();
+                d.setDate(d.getDate() - 30); // Mặc định lùi 30 ngày trước
+                document.getElementById('reportStartDate').value = d.toISOString().split('T')[0];
+                document.getElementById('reportEndDate').value = new Date().toISOString().split('T')[0];
+            }
+        }
+
+        function calculateAnalyticsReport() {
+            let start = document.getElementById('reportStartDate').value;
+            let end = document.getElementById('reportEndDate').value;
+
+            if (!start || !end) return;
+
+            let leadsInPeriod = appState.leads.filter(l => l.created >= start && l.created <= end);
+            document.getElementById('repTotalLeadsCount').innerText = leadsInPeriod.length;
+
+            // Đếm tỷ lệ phân hạng Tier
+            let segDistribution = { school: 0, center: 0 };
+            let tierDistribution = { A: 0, B: 0, C: 0, Cold: 0, Loại: 0 };
+            
+            leadsInPeriod.forEach(l => {
+                segDistribution[l.segment]++;
+                let calc = computeIcpScoreAndTier(l);
+                tierDistribution[calc.tier]++;
+            });
+
+            document.getElementById('repDistributionStats').innerHTML = `
+                📌 <strong>Phân bổ Mô hình:</strong> Trường học: ${segDistribution.school} | Trung tâm ngoại ngữ: ${segDistribution.center}<br>
+                📊 <strong>Chất lượng danh sách phân hạng:</strong><br>
+                🟢 Tier A (Ưu tiên cao): ${tierDistribution.A}<br>
+                🟡 Tier B (Tiềm năng khá): ${tierDistribution.B}<br>
+                🟠 Tier C (Thăm dò): ${tierDistribution.C}<br>
+                ⚪ Tier Cold: ${tierDistribution.Cold}<br>
+                🔴 Đơn vị bị Loại: ${tierDistribution.Loại}
+            `;
+
+            // Đo lường To-do hoạt động hoàn tất
+            let totalDone = 0;
+            let typeStats = { Call: 0, Email: 0, Meeting: 0 };
+
+            appState.leads.forEach(l => {
+                l.todos.forEach(t => {
+                    if (t.done) {
+                        totalDone++;
+                        if (typeStats[t.type] !== undefined) typeStats[t.type]++;
+                    }
+                });
+            });
+
+            document.getElementById('repTotalDoneTodos').innerText = totalDone;
+            document.getElementById('repTodoTypeStats').innerHTML = `
+                📞 Cuộc gọi thành công (Call): ${typeStats.Call}<br>
+                ✉️ Thư điện tử đã gửi (Email): ${typeStats.Email}<br>
+                🤝 Lịch gặp trực tiếp / Online (Meeting): ${typeStats.Meeting}
+            `;
+        }
+
+        // ================= JAVASCRIPT LOGIC SECTION 4: DEEP AI & SCOUT DISCOVERY =================
+        async function callGeminiRestCoreApi(promptText) {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            const model = localStorage.getItem('gemini_model_name') || 'gemini-2.5-flash';
+
+            if (!apiKey) {
+                alert("Thiếu mã bảo mật! Vui lòng truy cập vào mục Cài đặt ở thanh công cụ góc trên bên phải để nạp Gemini API Key trước khi sử dụng AI.");
+                switchMainTab('settings');
+                return null;
+            }
+
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+            const payload = {
+                contents: [{ role: "user", parts: [{ text: promptText }] }],
+                tools: [{ google_search: {} }] // Kích hoạt Grounding định vị tìm kiếm mạng sống
+            };
+
+            try {
+                let response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                let json = await response.json();
+                if (json.error) {
+                    alert(`Lỗi API Hệ thống (${json.error.code}): ${json.error.message}`);
+                    return null;
+                }
+                return json.candidates[0].content.parts.reduce((acc, part) => acc + (part.text || ""), "");
+            } catch(e) {
+                alert("Không thể kết nối đến máy chủ Google API. Vui lòng kiểm tra lại chất lượng mạng hoặc trạng thái Quota gói.");
+                return null;
+            }
+        }
+
+        // AI RESEARCH 1 LEAD CHUYÊN SÂU (Tab inside panel)
+        async function runDeepAiResearchSingleLead() {
+            if (!activeLeadId) return;
+            let lead = appState.leads.find(l => l.id === activeLeadId);
+
+            document.getElementById('panelAiDeepLoadingStatus').classList.remove('hidden');
+            document.getElementById('panelAiResearchResultContainer').innerHTML = '';
+
+            let corePrompt = `Bạn là trợ lý nghiên cứu B2B cho công ty bán phần mềm quản trị nội bộ (E-Office) tại Việt Nam.
+Hãy tìm thông tin công khai và đánh giá cơ sở giáo dục sau:
+Tên: ${lead.name}
+Địa điểm: ${lead.province}
+Website/Fanpage: ${lead.website || 'Chưa có'}
+
+Cần tìm: loại hình (trường tư lập / trung tâm ngoại ngữ), số cơ sở/chi nhánh, quy mô nhân sự nội bộ ước tính, phân khúc học phí, có đang tuyển giáo viên/nhân sự không, tín hiệu mở rộng/gọi vốn/thay lãnh đạo gần đây, tên & chức vụ người ra quyết định nếu có. Trả lời bằng đoạn văn ngắn tiếng Việt từ 4-7 câu mạch lạc.`;
+
+            let textResponse = await callGeminiRestCoreApi(corePrompt);
+            document.getElementById('panelAiDeepLoadingStatus').classList.add('hidden');
+
+            if (textResponse) {
+                lead.aiSummary = `<p>${textResponse.replace(/\n/g, '<br>')}</p>`;
+                document.getElementById('panelAiResearchResultContainer').innerHTML = lead.aiSummary;
+                saveDataToLocalStorage();
+            }
+        }
+
+        // AI DISCOVERY QUÉT DIỆN RỘNG (Tab Scout Pools)
+        async function runAiScoutDiscovery() {
+            let query = document.getElementById('aiScoutQuery').value.trim();
+            if (!query) return alert("Vui lòng điền nội dung lĩnh vực / từ khóa địa bàn cần cào tìm kiếm dữ liệu!");
+
+            document.getElementById('aiScoutLoading').classList.remove('hidden');
+
+            let poolExclusions = aiScoutPool.slice(-40); // Lấy 40 đơn vị gần nhất để lách hàng chờ
+            let discoveryPrompt = `Bạn là chuyên gia trinh sát thị trường B2B doanh nghiệp giáo dục Việt Nam. 
+Hãy quét và tìm ra 3 đơn vị giáo dục (Trường học tư thục, Mầm non quốc tế, Hệ thống Anh ngữ hoặc trung tâm kỹ năng lớn) đang hoạt động thực tế tại thị trường tương ứng với từ khóa: "${query}".
+
+YÊU CẦU BẮT BUỘC LOẠI TRỪ KHÔNG ĐƯỢC HIỂN THỊ LẠI CÁC TÊN SAU (ĐÃ QUÉT): [${poolExclusions.join(', ')}].
+
+Trả về kết quả duy nhất là một khối chuỗi cấu trúc mảng JSON đặt bên trong dấu \`\`\`json ... \`\`\` không kèm chữ prose bên ngoài. Cấu trúc cấu thành bắt buộc như sau:
+[
+  {
+    "name": "Tên chính xác hệ thống đơn vị",
+    "province": "Tên tỉnh thành thuộc danh sách: TPHCM, Bình Dương, Đồng Nai,...",
+    "segment": "school hoặc center",
+    "campuses": 3,
+    "estimatedStaff": 45,
+    "aiBriefReport": "Đoạn mô tả ngắn 4 câu về quy mô hiện trạng hoạt động thực tế quét được trên internet của đơn vị này.",
+    "scores": {"s1": 2, "s2": 2, "s3": 1, "s4": 2, "s5": 2, "s6": 1, "s7": 2, "s8": 0}
+  }
+]
+Thang điểm scores chấm từ 0 đến 3 dựa trên tiêu chuẩn ICP Việt Nam. Nếu không chắc chắn, đặt thông số mặc định.`;
+
+            let jsonOutputText = await callGeminiRestCoreApi(discoveryPrompt);
+            document.getElementById('aiScoutLoading').classList.add('hidden');
+
+            if (!jsonOutputText) return;
+
+            try {
+                let cleanJsonStr = jsonOutputText.match(/```json([\s\S]*?)```/)?.[1] || jsonOutputText;
+                tempScoutedList = JSON.parse(cleanJsonStr.trim());
+                renderAiScoutTableOutput();
+            } catch(e) {
+                alert("Cấu trúc phản hồi từ mô hình AI gặp lỗi định dạng. Vui lòng nhấn nút thử lại đợt quét mới.");
+            }
+        }
+
+        function renderAiScoutTableOutput() {
+            const tbody = document.getElementById('aiScoutResultTableBody');
+            if (tempScoutedList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-light);">Chưa có dữ liệu trinh sát đợt mới. Hãy nhập từ khóa quét phía trên.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = '';
+            tempScoutedList.forEach((item, index) => {
+                // Giả lập tính toán điểm ICP sơ bộ dựa trên gợi ý scores của AI
+                let totalS = 0; for(let k in item.scores) { totalS += item.scores[k] * CRITERIA_METRICS[k].weight; }
+                let mockFinalScore = Math.round(totalS / 3);
+                
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${item.name}</strong></td>
+                    <td>📍 ${item.province}</td>
+                    <td>${item.segment === 'school' ? '🏫 Trường học' : '🔤 Trung tâm'}</td>
+                    <td>${item.campuses} cơ sở</td>
+                    <td><span style="font-weight:bold; color:var(--primary);">${mockFinalScore}đ</span></td>
+                    <td>
+                        <button class="btn btn-outline" style="color:var(--primary); border-color:var(--primary); padding:4px 8px; font-size:0.8rem; margin-right:5px;" onclick="openAiScoutPreviewModalIndex(${index}, ${mockFinalScore})">Xem cấu trúc</button>
+                        <button class="btn btn-danger" style="padding:4px 8px; font-size:0.8rem;" onclick="ignoreAndPushToPool('${item.name}', ${index})">Bỏ qua</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openAiScoutPreviewModalIndex(index, calculatedScore) {
+            let dataItem = tempScoutedList[index];
+            document.getElementById('modalPreviewTitle').innerText = dataItem.name;
+            document.getElementById('modalPreviewTextBody').innerHTML = `
+                <strong>Báo cáo trinh sát thực địa:</strong><br>${dataItem.aiBriefReport}<br><br>
+                📊 <strong>Điểm số định hình ICP dự kiến:</strong> <span style="color:var(--primary); font-weight:bold;">${calculatedScore} điểm</span><br>
+                🏢 Ước tính số cơ sở: ${dataItem.campuses} | Quy mô nhân sự nội bộ: ${dataItem.estimatedStaff} người.
+            `;
+            
+            let actionBtn = document.getElementById('modalPreviewActionBtn');
+            actionBtn.onclick = () => {
+                approveScoutedLeadToPipeline(dataItem, index);
+            };
+            
+            document.getElementById('aiScoutPreviewModal').classList.add('open');
+        }
+
+        function closeAiScoutPreviewModal() {
+            document.getElementById('aiScoutPreviewModal').classList.remove('open');
+        }
+
+        function approveScoutedLeadToPipeline(item, index) {
+            let newLead = createDefaultLeadSchema();
+            newLead.id = 'lead_' + Date.now();
+            newLead.name = item.name;
+            newLead.province = VIETNAM_PROVINCES.includes(item.province) ? item.province : "TPHCM";
+            newLead.segment = item.segment;
+            newLead.campuses = item.campuses || 0;
+            newLead.staff = item.estimatedStaff || 0;
+            newLead.aiSummary = `<p><b>Tóm tắt từ AI Discovery:</b> ${item.aiBriefReport}</p>`;
+            
+            if (item.scores) { for(let k in item.scores) { newLead[k] = item.scores[k]; } }
+
+            appState.leads.push(newLead);
+            aiScoutPool.push(item.name); // Nạp tên vào danh sách loại trừ (Pool)
+            
+            // Xóa khỏi danh sách tạm thời hiển thị
+            tempScoutedList.splice(index, 1);
+            saveDataToLocalStorage();
+            closeAiScoutPreviewModal();
+            renderAiScoutTableOutput();
+            alert(`Đã nạp thành công [${item.name}] vào danh sách hàng chờ Pipeline chính.`);
+        }
+
+        function ignoreAndPushToPool(name, index) {
+            aiScoutPool.push(name);
+            tempScoutedList.splice(index, 1);
+            saveDataToLocalStorage();
+            renderAiScoutTableOutput();
+        }
+
+        // ================= JAVASCRIPT LOGIC SECTION 5: CONFIGURATION & DATA BACKUP =================
+        function saveSystemConfiguration() {
+            let key = document.getElementById('cfgApiKey').value.trim();
+            let model = document.getElementById('cfgModelName').value;
+
+            localStorage.setItem('gemini_api_key', key);
+            localStorage.setItem('gemini_model_name', model);
+            alert("Đã lưu thông tin cấu hình hệ thống Core AI thành công.");
+            switchMainTab('pipeline');
+        }
+
+        function backupData() {
+            let blob = new Blob([JSON.stringify(appState, null, 2)], { type: "application/json" });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.href = url; a.download = `icp_pipeline_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+
+        function triggerRestore() {
+            let input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
+            input.onchange = e => {
+                let file = e.target.files[0];
+                let reader = new FileReader();
+                reader.onload = event => {
+                    try {
+                        let json = JSON.parse(event.target.result);
+                        let mode = confirm("Nhấn 'OK' để GỘP dữ liệu (Trùng ID sẽ cập nhật đè), hoặc nhấn 'Cancel' để THAY THẾ TOÀN BỘ kho dữ liệu hiện tại.");
+                        processImportedJsonPackage(json, mode ? 'merge' : 'replace');
+                    } catch(err) {
+                        alert("File nhập vào không đúng định dạng JSON cấu trúc phân cấp.");
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function reloadSharedData() {
+            if (confirm("Hành động này sẽ thực hiện tải lại file data.json dùng chung từ máy chủ GitHub và ghi đè các cấu hình nội bộ. Xác nhận tiếp tục?")) {
+                fetch('./data.json')
+                    .then(res => {
+                        if (!res.ok) throw new Error(); return res.json();
+                    })
+                    .then(json => {
+                        processImportedJsonPackage(json, 'replace');
+                        alert("Đã đồng bộ thành công kho dữ liệu chung.");
+                    }).catch(() => alert("Không tìm thấy file data.json cấu hình chung tại thư mục gốc Repo của bạn."));
+            }
+        }
+
+        function processImportedJsonPackage(json, mode = 'merge') {
+            let incomingLeads = [];
+            if (Array.isArray(json)) incomingLeads = json;
+            else if (json.leads) incomingLeads = json.leads;
+
+            let validatedLeads = incomingLeads.map(l => Object.assign(createDefaultLeadSchema(), l));
+
+            if (mode === 'replace') {
+                appState.leads = validatedLeads;
+            } else {
+                // Chế độ gộp (Merge) dữ liệu trùng khớp ID
+                validatedLeads.forEach(incoming => {
+                    let oldIdx = appState.leads.findIndex(o => o.id === incoming.id);
+                    if (oldIdx > -1) appState.leads[oldIdx] = incoming; else appState.leads.push(incoming);
+                });
+            }
+
+            saveDataToLocalStorage();
+            renderPipelineTable();
+        }
+
+        function loadSampleMockData() {
+            // Mảng dữ liệu mẫu cấu hình chuẩn 4 Tier ban đầu
+            const mock = [
+                { id: "m_1", name: "Hệ thống trường Quốc tế Song ngữ Việt Mỹ", segment: "school", province: "TPHCM", contact: "Chị Thảo (Hành chính)", campuses: 3, staff: 88, s1: 3, s2: 2, s3: 3, s4: 2, s5: 2, s6: 2, s7: 3, s8: 2, noteLogs:[{timestamp:"29/05/2026, 14:00:00", text:"Đơn vị quy mô lớn, đang đau đầu bài toán chấm công giáo viên bản xứ."}], todos: [{id:"t_m1", type:"Call", content:"Gọi điện đặt lịch hẹn demo tính năng chấm công lương", due: new Date().toISOString().split('T')[0], done:false}] },
+                { id: "m_2", name: "Chuỗi trung tâm Anh ngữ Thần Đồng", segment: "center", province: "Bình Dương", contact: "Thầy John (Giám đốc học thuật)", campuses: 5, staff: 42, s1: 2, s2: 3, s3: 2, s4: 3, s5: 2, s6: 1, s7: 2, s8: 1, noteLogs:[], todos: [] },
+                { id: "m_3", name: "Trung tâm Ngoại ngữ Thắp Sáng (Bright Light)", segment: "center", province: "Đồng Nai", contact: "Anh Minh (Chủ quản)", campuses: 2, staff: 18, s1: 1, s2: 1, s3: 1, s4: 1, s5: 1, s6: 0, s7: 1, s8: 2, noteLogs:[], todos: [] },
+                { id: "m_4", name: "Trường Đại học Sư phạm Kỹ thuật (Cơ sở 2)", segment: "school", province: "TPHCM", isPublic: "yes", staff: 120, campuses: 1, s1: 3, s2: 0, s3: 3, s4: 1, s5: 1, s6: 0, s7: 2, s8: 0, noteLogs:[], todos: [] }
+            ];
+            processImportedJsonPackage(mock, 'replace');
+        }
+    </script>
+</body>
+</html>
